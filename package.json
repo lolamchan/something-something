@@ -11,7 +11,12 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "express-session": "*",
+    "multer": "*",
+    "qrcode-svg": "*",
+    "jsqr": "*",
+    "sharp": "*"  
   },
   "engines": {
     "node": ">=14"
