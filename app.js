@@ -14,7 +14,7 @@ const flag0 = 'Sorry, not this way';
 const flag1ST = encodeQR(flag0);
 
 function encodeQR(data){
-  return new QRCode(flag0).svg();
+  return new QRCode(data).svg();
 }
 
 async function decodeQR(svg){
