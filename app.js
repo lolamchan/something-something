@@ -70,6 +70,11 @@ app.get('/flag3', upload.none(), (req, res) => {
   res.send(req.query.qrcode);
 });
 
+app.get('/flag', (req, res) => {
+  res.setHeader('content-type', 'image/svg+xml');
+  res.send(encodeQR(req.query.qrcode));
+});
+
 
 app.listen(PORT, HOST, () => {
   console.log(`Running on http://${HOST}:${PORT}`);
