@@ -62,7 +62,7 @@ app.get('/flag1', upload.none(), (req, res) => {
 
 app.get('/flag2', upload.none(), (req, res) => {
   res.setHeader('content-type', 'image/svg+xml');
-  res.send(encodeQR(req.headers));
+  res.send(encodeQR(req.query.qrcode));
 });
 
 
