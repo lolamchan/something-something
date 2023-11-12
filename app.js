@@ -1,61 +1,71 @@
-const express = require("express");
+// encodeST and decodeST are based on RegExp
+// npm install express express-session multer qrcode-svg jsqr sharp  
+const express = require('express');
+// const express require('express';
+const session = require('express-session');
+const multer = require('multer');
+const QRCode = require('qrcode-svg');
+const jsQR = require('jsqr');
+const sharp = require('sharp');
+
+const PORT = 8080;
+const HOST = '0.0.0.0';
+const flag0 = 'Sorry, not this way';
+const flag1ST = encodeQR(flag0);
+
+function encodeQR(data){
+  return new QRCode(flag0).svg();
+}
+
+async function decodeQR(svg){
+  try{
+    const {data, info} = await sharp(new Buffer(svg)).ensureAlpha().raw().toBuffer({resolveWithObject: true});
+    const output = await jsQR(new Uint8ClampedArray(data.buffer), info.width, info.height);
+    return output.data;
+  }catch(e){
+    return null;
+  }
+}
+
 const app = express();
-const port = process.env.PORT || 3001;
+app.use(session({
+  secret: 'ssss', 
+  resave: false, 
+  saveUninitialized: false, 
+  cookie: {maxAge: 60000}
+}));
+const upload = multer({dest: '/tmp/'})
 
-app.get("/", (req, res) => res.type('html').send(html));
+app.get('/', upload.none(), (req, res) => {
+  res.send(`
+    <html>
+    <head>
+      <title>ST Code Challenge</title>
+    </head>
+    <body>
+      <h1>ST Code Challenge</h1>
+      <h2>/flag1</h2>
+      <p>Can you read the flag require(ST Code?</p>
+      <h2>/flag2</h2>
+      <p>Can you generate ST Code to read the flag?</p>
+      <h2>/source</h2>
+      <p>Show source of this file</p>
+    </body>
+    </html>
+  `);
+});
 
-const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.get('/flag1', upload.none(), (req, res) => {
+  res.setHeader('content-type', 'image/svg+xml');
+  res.send(flag1ST);
+});
 
-server.keepAliveTimeout = 120 * 1000;
-server.headersTimeout = 120 * 1000;
+app.get('/flag2', upload.none(), (req, res) => {
+  res.setHeader('content-type', 'image/svg+xml');
+  res.send(encodeQR(req.headers));
+});
 
-const html = `
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Hello from Render!</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <script>
-      setTimeout(() => {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-          disableForReducedMotion: true
-        });
-      }, 500);
-    </script>
-    <style>
-      @import url("https://p.typekit.net/p.css?s=1&k=vnd5zic&ht=tk&f=39475.39476.39477.39478.39479.39480.39481.39482&a=18673890&app=typekit&e=css");
-      @font-face {
-        font-family: "neo-sans";
-        src: url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff2"), url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff"), url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("opentype");
-        font-style: normal;
-        font-weight: 700;
-      }
-      html {
-        font-family: neo-sans;
-        font-weight: 700;
-        font-size: calc(62rem / 16);
-      }
-      body {
-        background: white;
-      }
-      section {
-        border-radius: 1em;
-        padding: 1em;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-right: -50%;
-        transform: translate(-50%, -50%);
-      }
-    </style>
-  </head>
-  <body>
-    <section>
-      Hello from Render!
-    </section>
-  </body>
-</html>
-`
+
+app.listen(PORT, HOST, () => {
+  console.log(`Running on http://${HOST}:${PORT}`);
+});
